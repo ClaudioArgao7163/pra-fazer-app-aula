@@ -1,24 +1,45 @@
 import { View, Text, TextInput, TouchableOpacity } from 'react-native'
 import React, { useState } from 'react'
+import { firebase } from '../../services/firebaseConfig'
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth"
 import styles from './style'
 
-export default function CreateUser() {
-    
+export default function CreateUser({navigation}) {
+
     const [nome, setNome] = useState("")
     const [email, setEmail] = useState("")
-    const [senha, setSenha] = useState("")
-    const [errorCreateUser, setErrorCreateUser] = useState (null)
+    const [password, setPassword] = useState("")
+    const [errorCreateUser, setErrorCreateUser] = useState(null)
 
-    function Validate (){
-        if (nome == ""){
+    function Validate() {
+        if (nome == "") {
             setErrorCreateUser("informe o seu nome")
         } else if (email == "") {
             setErrorCreateUser("Informe o seu e-mail")
-        } else if (senha == "") {
+        } else if (password == "") {
             setErrorCreateUser("Informe uma senha");
         } else {
             setErrorCreateUser(null)
+            CreateUser();
         }
+    }
+
+    const CreateUser = () => {
+
+        const auth = getAuth();
+        createUserWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
+            
+                const user = userCredential.user;
+                navigation.navigate('Tabs')
+        
+            })
+            .catch((error) => {
+                const errorCode = error.code;
+                const errorMessage = error.message;
+                setErrorCreateUser(errorMessage);
+      
+            });
     }
 
     return (
@@ -44,9 +65,9 @@ export default function CreateUser() {
             <TextInput
                 style={styles.input}
                 secureTextEntry={true}
-                placeholder='Senha'
-                value={senha}
-                onChangeText={setSenha}
+                placeholder='password'
+                value={password}
+                onChangeText={setPassword}
             />
 
             <TouchableOpacity
